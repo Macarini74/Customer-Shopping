@@ -1,5 +1,10 @@
 import streamlit as st
 import sqlite3
+import plotly.express as px
+import pandas as pd
+import pycountry
+from fuzzywuzzy import process
+
 
 
 # Análise Exclusivas:
@@ -11,9 +16,7 @@ import sqlite3
 # Análise de fronteira:
 #     Cidades com maior ticket médio vs cidades com maior fidelidade
 #         (frequência de compras)
-
-st.markdown("<h1 style='text-align: center;'>🌎 Análise por Localização </h1>", unsafe_allow_html=True)
-
+  
 st.subheader('', divider=True)
 
 conn = sqlite3.connect("data/shopping.db")
@@ -23,7 +26,7 @@ cursor.execute('SELECT DISTINCT location FROM shopping')
 
 cidades = [row[0] for row in cursor.fetchall() if row[0] is not None]
 
-cidades.insert(0, "Todas")
+cidades.sort()
 
 natureza_escolhida = st.selectbox("**Selecione uma cidade:**", cidades)
 
@@ -50,7 +53,50 @@ cursor.execute('SELECT AVG(review_rating) FROM shopping WHERE location = ?', (na
 avg_rat = cursor.fetchone()[0]
 
 ## Taxa de Assinantes
-cursor.execute('SELECT COUNT(*) FROM shopping WHERE location = ? AND subscription_status = "YES"', (natureza_escolhida,))
-taxa_assinantes = cursor.fetchall() 
-st.write(ad_cupom)
-st.write(taxa_assinantes)
+cursor.execute('SELECT COUNT(*) FROM shopping WHERE location = ? AND subscription_status = "Yes"', (natureza_escolhida,))
+taxa_assinantes = (cursor.fetchone()[0] / total_clientes) * 100
+
+# Geocodifica cidades
+
+cursor.execute("DROP VIEW IF EXISTS maps")
+
+cursor.execute('''
+    CREATE VIEW IF NOT EXISTS maps AS
+        SELECT 
+            location,
+            category,
+            SUM(purchase_amount_usd) AS total_amount
+        FROM
+            shopping
+        GROUP BY
+            location, category
+        ORDER BY
+            location, total_amount DESC
+''')
+
+df = pd.read_sql_query("SELECT * FROM maps WHERE location = ?", conn, params=(natureza_escolhida,))
+
+fig = px.histogram(df, x="location", y='total_amount', color="category")
+# st.plotly_chart(fig)
+
+cursor.execute("DROP VIEW IF EXISTS maps")
+
+cursor.execute('''
+    CREATE VIEW IF NOT EXISTS payments AS
+               SELECT 
+                    location,
+                    payment_method,
+                    COUNT(payment_method) as quantidade
+                FROM 
+                    shopping
+                GROUP BY
+                    location,
+                    payment_method
+               ORDER BY
+                    location
+''')
+
+df = pd.read_sql_query("SELECT * FROM payments WHERE location = ?", conn, params=(natureza_escolhida,))
+
+fig = px.pie(df, values='quantidade', names='payment_method')
+# st.plotly_chart(fig)

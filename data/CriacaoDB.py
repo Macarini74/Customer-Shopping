@@ -55,5 +55,3 @@ def criarTable():
     conn.commit()
     conn.close()
 
-    print("Dados do CSV carregados e inseridos no banco de dados 'shopping.db' com sucesso!")
-
