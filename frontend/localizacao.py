@@ -62,7 +62,7 @@ col1, col2, col3 = st.columns(3)
 
 ## Aderência de Cupons
 cursor.execute('SELECT COUNT(*) FROM shopping WHERE location = ? AND promo_code_used = "Yes" ', (natureza_escolhida,))
-ad_cupom =  (cursor.fetchone()[0] / total_clientes) * 100
+ad_cupom =  (cursor.fetchone()[0] / total_clientes)
 
 col1.container(border=True).metric('Taxa de Aderência de Cupons', f'{ad_cupom:.2%}')
 
@@ -74,7 +74,7 @@ col2.container(border=True).metric('Satisfação Média', f'{avg_rat:.2f}')
 
 ## Taxa de Assinantes
 cursor.execute('SELECT COUNT(*) FROM shopping WHERE location = ? AND subscription_status = "Yes"', (natureza_escolhida,))
-taxa_assinantes = (cursor.fetchone()[0] / total_clientes) * 100
+taxa_assinantes = (cursor.fetchone()[0] / total_clientes)
 
 col3.container(border=True).metric('Taxa de Assinantes', f'{taxa_assinantes:.2%}')
 
