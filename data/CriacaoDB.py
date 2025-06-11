@@ -12,7 +12,6 @@ def criarTable():
     # 3. Renomeia colunas para formato compatível com SQL (snake_case e sem caracteres especiais)
     df.rename(columns=lambda x: x.strip().lower().replace(' ', '_').replace('(', '').replace(')', ''), inplace=True)
 
-    print(df.columns)
     # 4. Converte tipos de dados quando necessário
     df['age'] = df['age'].astype(int)
     df['purchase_amount_usd'] = df['purchase_amount_usd'].astype(float)
@@ -54,6 +53,4 @@ def criarTable():
     # 8. Finaliza
     conn.commit()
     conn.close()
-
-    print("Dados do CSV carregados e inseridos no banco de dados 'shopping.db' com sucesso!")
 
