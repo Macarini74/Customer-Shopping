@@ -208,3 +208,55 @@ fig2.update_traces(textposition='inside')
 
 st.subheader("🔖 Adoção de Assinaturas por Gênero")
 st.plotly_chart(fig2, use_container_width=True)
+
+st.divider()
+
+mapa_desc = {
+    'Yes': 'Com Desconto',
+    'No': 'Sem Desconto',
+    'Y': 'Com Desconto',
+    'N': 'Sem Desconto',
+    'True': 'Com Desconto',
+    'False': 'Sem Desconto'
+}
+df['desconto_pt'] = (
+    df['discount_applied']
+      .map(mapa_desc)
+      .fillna(df['discount_applied'])
+)
+
+freq_desc = (
+    df
+    .groupby(['frequency_of_purchases', 'desconto_pt'])
+    .size()
+    .reset_index(name='count')
+)
+totais_freq = freq_desc.groupby('frequency_of_purchases')['count'].transform('sum')
+freq_desc['pct'] = freq_desc['count'] / totais_freq * 100
+
+fig3 = px.bar(
+    freq_desc,
+    x='frequency_of_purchases',
+    y='pct',
+    color='desconto_pt',
+    barmode='stack',
+    text=freq_desc['pct'].map(lambda x: f"{x:.1f}%"),
+    labels={
+        'frequency_of_purchases': 'Frequência de Compras',
+        'pct': '% de Compras',
+        'desconto_pt': 'Desconto Aplicado'
+    },
+    color_discrete_map={
+        'Com Desconto': '#4CAF50',
+        'Sem Desconto': '#B0BEC5'
+    }
+)
+fig3.update_layout(
+    title='Relação entre Frequência de Compras e Uso de Descontos',
+    yaxis=dict(ticksuffix='%'),
+    legend_title='Desconto'
+)
+fig3.update_traces(textposition='inside')
+
+st.subheader("🔄 Frequência de Compras vs. Uso de Descontos")
+st.plotly_chart(fig3, use_container_width=True)
