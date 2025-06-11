@@ -1,5 +1,5 @@
 import streamlit as st
-# from data.CriacaoBD import criarTable
+from data.CriacaoDB import criarTable
 from streamlit import config as _config
 
 _config.set_option("theme.base", "light")
@@ -9,7 +9,7 @@ _config.set_option("theme.secondaryBackgroundColor", "#f0f2f6")
 _config.set_option("theme.textColor", "#31333F")
 
 def main():
-    # criarTable()
+    criarTable()
     st.set_page_config(
         page_title="Customer Shopping",
         page_icon="💸",
