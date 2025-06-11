@@ -32,7 +32,7 @@ natureza_escolhida = st.selectbox("**Selecione uma cidade:**", cidades)
 
 ## Big Numbers
 
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 
 # Ticket Médio
 cursor.execute('SELECT AVG(purchase_amount_usd) FROM shopping WHERE location = ?', (natureza_escolhida,))
@@ -52,6 +52,14 @@ total_clientes = cursor.fetchone()[0]
 
 col3.container(border=True).metric('Número de Clientes', f'{total_clientes}')
 
+## Idade Média
+cursor.execute('SELECT AVG(age) FROM shopping WHERE location = ?', (natureza_escolhida,))
+idade_media = cursor.fetchone()[0]
+
+col4.container(border=True).metric('Idade Média', f'{idade_media:.2f}')
+
+col1, col2, col3 = st.columns(3)
+
 ## Aderência de Cupons
 cursor.execute('SELECT COUNT(*) FROM shopping WHERE location = ? AND promo_code_used = "Yes" ', (natureza_escolhida,))
 ad_cupom =  (cursor.fetchone()[0] / total_clientes) * 100
@@ -70,45 +78,51 @@ taxa_assinantes = (cursor.fetchone()[0] / total_clientes) * 100
 
 col3.container(border=True).metric('Taxa de Assinantes', f'{taxa_assinantes:.2%}')
 
-cursor.execute("DROP VIEW IF EXISTS maps")
+localizacao, pagamentos = st.tabs(['Análise Pelo Valor e Categoria', 'Análise Pelo Método de Pagamento'])
 
-cursor.execute('''
-    CREATE VIEW IF NOT EXISTS maps AS
-        SELECT 
-            location,
-            category,
-            SUM(purchase_amount_usd) AS total_amount
-        FROM
-            shopping
-        GROUP BY
-            location, category
-        ORDER BY
-            location, total_amount DESC
-''')
+with localizacao:
 
-df = pd.read_sql_query("SELECT * FROM maps WHERE location = ?", conn, params=(natureza_escolhida,))
+    cursor.execute("DROP VIEW IF EXISTS maps")
 
-fig = px.histogram(df, x="location", y='total_amount', color="category")
-# st.plotly_chart(fig)
+    cursor.execute('''
+        CREATE VIEW IF NOT EXISTS maps AS
+            SELECT 
+                location,
+                category,
+                SUM(purchase_amount_usd) AS total_amount
+            FROM
+                shopping
+            GROUP BY
+                location, category
+            ORDER BY
+                location, total_amount DESC
+    ''')
 
-cursor.execute("DROP VIEW IF EXISTS maps")
+    df = pd.read_sql_query("SELECT * FROM maps WHERE location = ?", conn, params=(natureza_escolhida,))
 
-cursor.execute('''
-    CREATE VIEW IF NOT EXISTS payments AS
-               SELECT 
-                    location,
-                    payment_method,
-                    COUNT(payment_method) as quantidade
-                FROM 
-                    shopping
-                GROUP BY
-                    location,
-                    payment_method
-               ORDER BY
-                    location
-''')
+    fig = px.histogram(df, x="location", y='total_amount', color="category")
+    st.plotly_chart(fig)
 
-df = pd.read_sql_query("SELECT * FROM payments WHERE location = ?", conn, params=(natureza_escolhida,))
+with pagamentos:
 
-fig = px.pie(df, values='quantidade', names='payment_method')
-# st.plotly_chart(fig)
+    cursor.execute("DROP VIEW IF EXISTS maps")
+
+    cursor.execute('''
+        CREATE VIEW IF NOT EXISTS payments AS
+                SELECT 
+                        location,
+                        payment_method,
+                        COUNT(payment_method) as quantidade
+                    FROM 
+                        shopping
+                    GROUP BY
+                        location,
+                        payment_method
+                ORDER BY
+                        location
+    ''')
+
+    df = pd.read_sql_query("SELECT * FROM payments WHERE location = ?", conn, params=(natureza_escolhida,))
+
+    fig = px.pie(df, values='quantidade', names='payment_method')
+    st.plotly_chart(fig)
