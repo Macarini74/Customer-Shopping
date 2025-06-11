@@ -78,7 +78,7 @@ taxa_assinantes = (cursor.fetchone()[0] / total_clientes) * 100
 
 col3.container(border=True).metric('Taxa de Assinantes', f'{taxa_assinantes:.2%}')
 
-localizacao, pagamentos = st.tabs(['Análise Pelo Valor e Categoria', 'Análise Pelo Método de Pagamento'])
+localizacao, pagamentos, generos = st.tabs(['Análise Pelo Valor e Categoria', 'Análise Pelo Método de Pagamento', 'Analise por Gênero'])
 
 with localizacao:
 
@@ -125,4 +125,29 @@ with pagamentos:
     df = pd.read_sql_query("SELECT * FROM payments WHERE location = ?", conn, params=(natureza_escolhida,))
 
     fig = px.pie(df, values='quantidade', names='payment_method')
+    st.plotly_chart(fig)
+
+with generos:
+
+    cursor.execute("DROP VIEW IF EXISTS genders")
+
+    cursor.execute('''
+                CREATE VIEW IF NOT EXISTS genders AS
+                    SELECT
+                        location,
+                        category,
+                        COUNT(gender) AS quantidade,
+                        gender
+                    FROM
+                        shopping
+                    GROUP BY
+                        location,
+                        gender
+                    ORDER BY
+                        location 
+                   ''')
+    
+    df = pd.read_sql_query("SELECT * FROM genders WHERE location = ?", conn, params=(natureza_escolhida,))
+
+    fig = px.histogram(df, x="gender", y='quantidade', color="category")
     st.plotly_chart(fig)
