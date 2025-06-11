@@ -32,31 +32,43 @@ natureza_escolhida = st.selectbox("**Selecione uma cidade:**", cidades)
 
 ## Big Numbers
 
+col1, col2, col3 = st.columns(3)
+
 # Ticket Médio
 cursor.execute('SELECT AVG(purchase_amount_usd) FROM shopping WHERE location = ?', (natureza_escolhida,))
 ticket_medio = cursor.fetchone()[0]
+
+col1.container(border=True).metric('Ticked Médio', f'{ticket_medio:.2f}')
 
 ## Total de Vendas
 cursor.execute('SELECT SUM(purchase_amount_usd) FROM shopping WHERE location = ?', (natureza_escolhida,))
 total_amount = cursor.fetchone()[0]
 
+col2.container(border=True).metric('Renda total', f'{total_amount:.2f} $USD')
+
 ## Total de Clientes
 cursor.execute('SELECT COUNT(*) FROM shopping WHERE location = ?', (natureza_escolhida,))
 total_clientes = cursor.fetchone()[0]
+
+col3.container(border=True).metric('Número de Clientes', f'{total_clientes}')
 
 ## Aderência de Cupons
 cursor.execute('SELECT COUNT(*) FROM shopping WHERE location = ? AND promo_code_used = "Yes" ', (natureza_escolhida,))
 ad_cupom =  (cursor.fetchone()[0] / total_clientes) * 100
 
+col1.container(border=True).metric('Taxa de Aderência de Cupons', f'{ad_cupom:.2%}')
+
 ## Satisfação Regional
 cursor.execute('SELECT AVG(review_rating) FROM shopping WHERE location = ?', (natureza_escolhida,))
 avg_rat = cursor.fetchone()[0]
+
+col2.container(border=True).metric('Satisfação Média', f'{avg_rat:.2f}')
 
 ## Taxa de Assinantes
 cursor.execute('SELECT COUNT(*) FROM shopping WHERE location = ? AND subscription_status = "Yes"', (natureza_escolhida,))
 taxa_assinantes = (cursor.fetchone()[0] / total_clientes) * 100
 
-# Geocodifica cidades
+col3.container(border=True).metric('Taxa de Assinantes', f'{taxa_assinantes:.2%}')
 
 cursor.execute("DROP VIEW IF EXISTS maps")
 
