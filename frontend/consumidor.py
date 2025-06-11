@@ -1,6 +1,8 @@
 import sqlite3
 import pandas as pd
 import streamlit as st
+import plotly.express as px
+
 
 conn = sqlite3.connect('data/shopping.db')
 
@@ -61,4 +63,47 @@ col4.metric("🚻 Gênero Predominante", genero_predominante)
 
 st.divider()
 
+with st.expander("🛠️ Filtrar dados para as análises", expanded=True):
+    min_age, max_age = st.slider(
+        "Selecione a faixa de idade",
+        int(pd.read_sql_query("SELECT MIN(age) FROM shopping", conn).iloc[0,0]),
+        int(pd.read_sql_query("SELECT MAX(age) FROM shopping", conn).iloc[0,0]),
+        (18, 65)
+    )
+
+    genders = [row[0] for row in conn.execute("SELECT DISTINCT gender FROM shopping").fetchall()]
+    selected_genders = st.multiselect("Selecione gêneros", options=genders, default=genders)
+
+df = pd.read_sql_query("SELECT * FROM shopping", conn)
+df = df[
+    df.age.between(min_age, max_age) &
+    df.gender.isin(selected_genders)
+]
+
+df['age_decade'] = (df.age // 10) * 10
+
+heatmap_df = (
+    df
+    .groupby(['age_decade', 'category'])
+    .size()
+    .reset_index(name='count')
+    .pivot(index='age_decade', columns='category', values='count')
+    .fillna(0)
+)
+
+y_labels = [f"{int(d)}-{int(d)+9}" for d in heatmap_df.index]
+
+fig = px.imshow(
+    heatmap_df.values,
+    x=heatmap_df.columns,
+    y=y_labels,
+    labels=dict(x="Categoria", y="Década de Vida", color="Contagem"),
+    text_auto=True,
+    aspect="auto",
+)
+
+st.subheader("🗺️ Faixa Etária vs. Categoria Preferida")
+st.plotly_chart(fig, use_container_width=True)
+
+st.divider()
 
