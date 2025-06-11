@@ -96,6 +96,7 @@ y_labels = [f"{int(d)}-{int(d)+9}" for d in heatmap_df.index]
 fig = px.imshow(
     heatmap_df.values,
     x=heatmap_df.columns,
+    title="Faixa Etária vs. Categoria Preferida",
     y=y_labels,
     labels=dict(x="Categoria", y="Década de Vida", color="Contagem"),
     text_auto=True,
@@ -107,3 +108,107 @@ st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
 
+df['genero'] = (
+    df['gender']
+    .str.lower()
+    .map({'male': 'Masculino', 'female': 'Feminino'})
+    .fillna(df['gender'].str.title())
+)
+
+color_df = (
+    df
+    .groupby(['genero', 'color'])
+    .size()
+    .reset_index(name='count')
+)
+
+fig1 = px.bar(
+    color_df,
+    x='color',
+    y='count',
+    color='genero',
+    barmode='group',
+    color_discrete_map={
+        'Masculino': '#89CFF0',
+        'Feminino': '#eb2188'
+    },
+    labels={
+        'color': 'Cor',
+        'count': 'Número de Compras',
+        'genero': 'Gênero'
+    },
+    text='count'
+)
+fig1.update_traces(textposition='outside')
+fig1.update_layout(
+    title='Preferência de Cores por Gênero',
+    xaxis_title='Cor',
+    yaxis_title='Número de Compras',
+    legend_title='Gênero',
+    uniformtext_minsize=8,
+    uniformtext_mode='hide'
+)
+
+st.subheader("🎨 Preferência de Cores por Gênero")
+st.plotly_chart(fig1, use_container_width=True)
+
+st.divider()
+
+mapa_sub = {
+    'Yes': 'Assinante',
+    'No': 'Não Assinante',
+    'Y': 'Assinante',
+    'N': 'Não Assinante',
+    'Active': 'Assinante',
+    'Inactive': 'Não Assinante',
+    'Subscribed': 'Assinante',
+    'Not Subscribed': 'Não Assinante'
+}
+df['status_pt'] = (
+    df['subscription_status']
+    .map(mapa_sub)
+    .fillna(df['subscription_status'].str.title())
+)
+
+# 2) Agrupa por gênero e status, conta
+sub_df = (
+    df
+    .groupby(['genero', 'status_pt'])
+    .size()
+    .reset_index(name='count')
+)
+
+# 3) Calcula percentual DENTRO de cada gênero usando transform
+totais_por_genero = sub_df.groupby('genero')['count'].transform('sum')
+sub_df['pct'] = sub_df['count'] / totais_por_genero * 100
+
+# 4) Cria o gráfico de barras empilhadas com percentuais
+import plotly.express as px
+
+fig2 = px.bar(
+    sub_df,
+    x='genero',
+    y='pct',
+    color='status_pt',
+    barmode='stack',
+    text=sub_df['pct'].map(lambda x: f"{x:.1f}%"),
+    labels={
+        'genero': 'Gênero',
+        'pct': '% de Clientes',
+        'status_pt': 'Status de Assinatura'
+    },
+    color_discrete_map={
+        'Assinante': '#2BAB4D',      # verde claro
+        'Não Assinante': '#B61E1B'   # vermelho claro
+    }
+)
+fig2.update_layout(
+    title='Adoção de Assinaturas por Gênero',
+    yaxis=dict(ticksuffix='%'),
+    legend_title_text='Status de Assinatura'
+)
+fig2.update_traces(textposition='inside')
+
+# 5) Renderiza no Streamlit
+st.subheader("🔖 Adoção de Assinaturas por Gênero")
+st.plotly_chart(fig2, use_container_width=True)
