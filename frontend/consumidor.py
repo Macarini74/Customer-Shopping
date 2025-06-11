@@ -170,7 +170,6 @@ df['status_pt'] = (
     .fillna(df['subscription_status'].str.title())
 )
 
-# 2) Agrupa por gênero e status, conta
 sub_df = (
     df
     .groupby(['genero', 'status_pt'])
@@ -178,11 +177,9 @@ sub_df = (
     .reset_index(name='count')
 )
 
-# 3) Calcula percentual DENTRO de cada gênero usando transform
 totais_por_genero = sub_df.groupby('genero')['count'].transform('sum')
 sub_df['pct'] = sub_df['count'] / totais_por_genero * 100
 
-# 4) Cria o gráfico de barras empilhadas com percentuais
 import plotly.express as px
 
 fig2 = px.bar(
@@ -198,8 +195,8 @@ fig2 = px.bar(
         'status_pt': 'Status de Assinatura'
     },
     color_discrete_map={
-        'Assinante': '#2BAB4D',      # verde claro
-        'Não Assinante': '#B61E1B'   # vermelho claro
+        'Assinante': '#2BAB4D',      
+        'Não Assinante': '#B61E1B'   
     }
 )
 fig2.update_layout(
@@ -209,6 +206,5 @@ fig2.update_layout(
 )
 fig2.update_traces(textposition='inside')
 
-# 5) Renderiza no Streamlit
 st.subheader("🔖 Adoção de Assinaturas por Gênero")
 st.plotly_chart(fig2, use_container_width=True)
