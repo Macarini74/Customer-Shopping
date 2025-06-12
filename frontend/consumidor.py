@@ -16,7 +16,7 @@ def kpi_box(title, value, gradient_css):
         font-family: Arial, sans-serif;
         margin-bottom: 10px;
     ">
-        <h3 style='margin:0'>{title}</h3>
+        <div style="font-size: 18px; font-weight: 500; color: #333;">{title}</div>
         <p style='font-size: 24px; margin: 5px 0 0 0; font-weight: bold;'>{value}</p>
     </div>
     """

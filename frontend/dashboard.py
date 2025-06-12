@@ -4,7 +4,7 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 
-st.markdown(f"<h1 style='text-align: center;'>📊 Dashboard Geral</h1>", unsafe_allow_html=True)
+st.markdown(f"<h1 style='text-align: center;'>📊 Dashboard Geralgit </h1>", unsafe_allow_html=True)
 
 conn = sqlite3.connect("data/shopping.db")
 cursor = conn.cursor()
@@ -70,7 +70,7 @@ def kpi_box(title, value, gradient_css):
         font-family: Arial, sans-serif;
         margin-bottom: 10px;
     ">
-        <h3 style='margin:0'>{title}</h3>
+        <div style="font-size: 18px; font-weight: 500; color: #333;">{title}</div>
         <p style='font-size: 24px; margin: 5px 0 0 0; font-weight: bold;'>{value}</p>
     </div>
     """
