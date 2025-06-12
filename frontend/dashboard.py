@@ -90,9 +90,30 @@ with col4:
     st.markdown(kpi_box("Adoção de Assinaturas", f"{percentual_ativos:.2%}", "linear-gradient(to bottom, #4d94d4, #cceeff)"), unsafe_allow_html=True)
 
 with col:
-    st.markdown(kpi_box("Freq. Média de Compra Anual", f"{freq_media_anual:.1f}", "linear-gradient(to bottom, #4d94d4, #cceeff)"), unsafe_allow_html=True)
+    st.markdown(kpi_box("Freq. Média de Compras Anual", f"{freq_media_anual:.1f}", "linear-gradient(to bottom, #4d94d4, #cceeff)"), unsafe_allow_html=True)
 st.subheader("",  divider = True)
 
+#---------------------------------BAR PRODUTOS-------------------------------------------
+query_bar = """
+SELECT item_purchased, COUNT(*) AS quantidade
+FROM shopping
+GROUP BY item_purchased
+ORDER BY quantidade DESC
+"""
+df_bar = pd.read_sql_query(query_bar, conn)
+
+fig_bar = px.bar(
+    df_bar,
+    x="item_purchased",
+    y="quantidade",
+    labels={"item_purchased": "Produto", "quantidade": "Quantidade"},
+    color="quantidade",
+    color_continuous_scale="Blues"
+)
+
+with st.container(border=True):
+    st.markdown("<h3 style='text-align: center;'>Gráfico de Barras:<br> Produtos Mais Comprados</h3>", unsafe_allow_html=True)
+    st.plotly_chart(fig_bar, use_container_width=True)
 #---------------------------------RADAR CHART-------------------------------------------
 query_radar = """
 SELECT season,
@@ -155,12 +176,40 @@ fig = px.treemap(
 
 col5, col6 =st.columns(2)
 with col5.container(border = True):
-    st.markdown(f"<h3 style='text-align: center;'>Treemap: Compras por Categoria e Gênero<br>  </h3>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='text-align: center;'>Treemap:<br> Compras por Categoria e Gênero<br>  </h3>", unsafe_allow_html=True)
     st.plotly_chart(fig, use_container_width=True)
 with col6.container(border = True):
-    st.markdown(f"<h3 style='text-align: center;'>Radar Chart: Vendas e Avaliações por Temporada<br></h3>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='text-align: center;'>Radar Chart:<br> Vendas e Avaliações por Temporada<br></h3>", unsafe_allow_html=True)
     st.plotly_chart(fig_radar, use_container_width=True)
+#-------------------------------------HEATMAP-----------------------------------------
+query_heatmap = """
+SELECT age, purchase_amount_usd, review_rating
+FROM shopping
+"""
+df_corr = pd.read_sql_query(query_heatmap,conn)
+corr_matrix = df_corr.corr()
+
+corr_matrix = corr_matrix.rename(columns={
+    'age': 'Idade',
+    'purchase_amount_usd': 'Valor de Compra',
+    'review_rating': 'Avaliação'
+}, index={
+    'age': 'Idade',
+    'purchase_amount_usd': 'Valor de Compra',
+    'review_rating': 'Avaliação'
+})
+
+fig_heatmap = px.imshow(
+        corr_matrix,
+        text_auto = True,
+        color_continuous_scale = 'teal',
+        aspect = 'auto'
+)
+st.subheader("", divider = True)
+with st.container(border=True):
+    st.markdown(f"<h3 style='text-align: center;'>Heat Map:<br>Avaliação x Review x Valor<br></h3>", unsafe_allow_html=True)
+    st.plotly_chart(fig_heatmap, use_container_width=True)
 
 
-
+#'teal'
 conn.close()
