@@ -3,7 +3,6 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 
-
 conn = sqlite3.connect('data/shopping.db')
 
 query_revenue = """
@@ -96,15 +95,15 @@ y_labels = [f"{int(d)}-{int(d)+9}" for d in heatmap_df.index]
 fig = px.imshow(
     heatmap_df.values,
     x=heatmap_df.columns,
-    title="Faixa Etária vs. Categoria Preferida",
     y=y_labels,
     labels=dict(x="Categoria", y="Década de Vida", color="Contagem"),
     text_auto=True,
     aspect="auto",
 )
 
-st.subheader("🗺️ Faixa Etária vs. Categoria Preferida")
-st.plotly_chart(fig, use_container_width=True)
+with st.container(border=True):
+    st.subheader("🗺️ Faixa Etária vs. Categoria Preferida")
+    st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
 
@@ -141,7 +140,6 @@ fig1 = px.bar(
 )
 fig1.update_traces(textposition='outside')
 fig1.update_layout(
-    title='Preferência de Cores por Gênero',
     xaxis_title='Cor',
     yaxis_title='Número de Compras',
     legend_title='Gênero',
@@ -149,8 +147,9 @@ fig1.update_layout(
     uniformtext_mode='hide'
 )
 
-st.subheader("🎨 Preferência de Cores por Gênero")
-st.plotly_chart(fig1, use_container_width=True)
+with st.container(border=True):
+    st.subheader("🎨 Preferência de Cores por Gênero")
+    st.plotly_chart(fig1, use_container_width=True)
 
 st.divider()
 
@@ -180,7 +179,6 @@ sub_df = (
 totais_por_genero = sub_df.groupby('genero')['count'].transform('sum')
 sub_df['pct'] = sub_df['count'] / totais_por_genero * 100
 
-import plotly.express as px
 
 fig2 = px.bar(
     sub_df,
@@ -200,14 +198,14 @@ fig2 = px.bar(
     }
 )
 fig2.update_layout(
-    title='Adoção de Assinaturas por Gênero',
     yaxis=dict(ticksuffix='%'),
     legend_title_text='Status de Assinatura'
 )
 fig2.update_traces(textposition='inside')
 
-st.subheader("🔖 Adoção de Assinaturas por Gênero")
-st.plotly_chart(fig2, use_container_width=True)
+with st.container(border=True):
+    st.subheader("🔖 Adoção de Assinaturas por Gênero")
+    st.plotly_chart(fig2, use_container_width=True)
 
 st.divider()
 
@@ -252,11 +250,11 @@ fig3 = px.bar(
     }
 )
 fig3.update_layout(
-    title='Relação entre Frequência de Compras e Uso de Descontos',
     yaxis=dict(ticksuffix='%'),
     legend_title='Desconto'
 )
 fig3.update_traces(textposition='inside')
 
-st.subheader("🔄 Frequência de Compras vs. Uso de Descontos")
-st.plotly_chart(fig3, use_container_width=True)
+with st.container(border=True):
+    st.subheader("🔄 Frequência de Compras vs. Uso de Descontos")
+    st.plotly_chart(fig3, use_container_width=True)
