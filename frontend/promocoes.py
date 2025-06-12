@@ -21,8 +21,7 @@ df = pd.read_sql_query("SELECT * FROM shopping", conn)
 # ====================================
 # TÍTULO DA PÁGINA
 # ====================================
-st.title("Análise de Promoções")
-st.subheader('', divider=True)
+st.markdown(f"<h1 style='text-align: center;'>📊 Análise de Promoções <br> </h1>", unsafe_allow_html=True)
 
 # ====================================
 # COLUNAS PARA KPIs
@@ -78,6 +77,7 @@ diferenca_percentual_ticket_medio = 0
 if ticket_mediono != 0:
     diferenca_percentual_ticket_medio = ((ticket_medio_yes - ticket_mediono) / ticket_mediono) * 100
 
+st.divider()
 
 # ====================================
 # GRÁFICO: Método de Pagamento por Grupo
@@ -126,11 +126,11 @@ fig_pizza_pagamento = px.pie(
     values='Quantidade',
     title='Distribuição Geral dos Métodos de Pagamento',
     hole=0,
-    color_discrete_sequence=px.colors.qualitative.Pastel
+    color_discrete_sequence=px.colors.sequential.Blues_r
 )
 pcol1.plotly_chart(fig_pizza_pagamento)
 
-
+st.divider()
 
 # ====================================
 # GRÁFICO: Frequência e Proporção de Cupons por Temporada
@@ -152,7 +152,8 @@ fig = px.pie(
     names='season',
     values='proporcao_com_desconto',
     title='Proporção de Uso de Cupons por Temporada',
-    hole=0.4
+    hole=0.4,
+    color_discrete_sequence=px.colors.sequential.Blues_r
 )
 cl1g.plotly_chart(fig)
 
@@ -199,19 +200,13 @@ compra_anter_no = discount_applied_no['previous_purchases'].mean().round(1)
 # EXIBIÇÃO DOS KPIs
 # ====================================
 # Função auxiliar para centralizar KPIs
-def kpi_centered(label, value, delta=None, help=None, border_color="#ccc", value_color="#0066cc"):
+def kpi_centered(label, value, delta=None, help=None, gradient_css = None):
     # Determina a cor do delta: verde se positivo, vermelho se negativo, cinza se None ou vazio
-    if delta is None or str(delta).strip() == '':
-        delta_color = "#999999"  # cinza neutro para quando não houver delta
-    else:
-        # Assume que delta é uma string tipo "12.3%" ou "-5.2%"
-        # Se começar com "-", vermelho, senão verde
-        delta_color = "red" if str(delta).startswith("-") else "green"
-
+  
     st.markdown(
         f"""
         <div style="
-            border: 2px solid {border_color};
+            background: {gradient_css};
             border-radius: 12px;
             padding: 16px;
             text-align: center;
@@ -220,7 +215,7 @@ def kpi_centered(label, value, delta=None, help=None, border_color="#ccc", value
             margin-bottom: 20px;  /* Espaçamento vertical adicionado */
         ">
             <div style="font-size: 16px; font-weight: 500; color: #333;">{label}</div>
-            <div style="font-size: 28px; font-weight: bold; color: {value_color}; margin-top: 5px;">{value}</div>
+            <div style="font-size: 28px; font-weight: bold; margin-top: 5px;">{value}</div>
             {f'<div style="font-size: 12px; color: gray; margin-top: 4px;">{help}</div>' if (help is not None and str(help).strip() != '') else ''}
         </div>
         """,
@@ -233,7 +228,8 @@ with cl1c:
         "Ticket Médio com Desconto",
         f"US$ {ticket_medio_yes:.2f}",
         delta=f"{diferenca_percentual_ticket_medio:.1f}%",
-        help=f"{count_clientes_yes} clientes únicos"
+        help=f"{count_clientes_yes} clientes únicos",
+        gradient_css="linear-gradient(to top, #d0f0c0, #b0e57c)"
     )
 
 with cl2c:
@@ -241,15 +237,16 @@ with cl2c:
         "Ticket Médio sem Desconto",
         f"US$ {ticket_mediono:.2f}",
         delta=None,
-        help=f"{count_clientes_no} clientes únicos"
+        help=f"{count_clientes_no} clientes únicos",
+        gradient_css="linear-gradient(to top, #d0f0c0, #b0e57c)"
     )
 
 # KPIs adicionais
 with cl1:
-    kpi_centered("Média de Avaliação (com desconto)", f"{float(media_aval_yes):.2f}")
+    kpi_centered("Média de Avaliação (com desconto)", f"{float(media_aval_yes):.2f}", gradient_css="linear-gradient(to bottom, #4d94d4, #cceeff)")
 with cl2:
-    kpi_centered("Compras Anteriores (com desconto)", f"{float(compra_anter_yes):.1f}")
+    kpi_centered("Compras Anteriores (com desconto)", f"{float(compra_anter_yes):.1f}",gradient_css="linear-gradient(to bottom, #4d94d4, #cceeff)")
 with cl3:
-    kpi_centered("Média de Avaliação (sem desconto)", f"{float(media_aval_no):.2f}")
+    kpi_centered("Média de Avaliação (sem desconto)", f"{float(media_aval_no):.2f}",gradient_css="linear-gradient(to bottom, #4d94d4, #cceeff)")
 with cl4:
-    kpi_centered("Compras Anteriores (sem desconto)", f"{float(compra_anter_no):.1f}")
+    kpi_centered("Compras Anteriores (sem desconto)", f"{float(compra_anter_no):.1f}",gradient_css="linear-gradient(to bottom, #4d94d4, #cceeff)")
