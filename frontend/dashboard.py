@@ -4,7 +4,7 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 
-st.markdown(f"<h1 style='text-align: center;'>📊 Dashboard Geral<br> </h1>", unsafe_allow_html=True)
+st.markdown(f"<h1 style='text-align: center;'>📊 Dashboard Geral</h1>", unsafe_allow_html=True)
 
 conn = sqlite3.connect("data/shopping.db")
 cursor = conn.cursor()
@@ -77,11 +77,11 @@ def kpi_box(title, value, gradient_css):
 
 
 with col1:
-    st.markdown(kpi_box("Faturamento Total", f"R$ {faturamento_total:.2f}", "linear-gradient(to top, #d0f0c0, #b0e57c)"), unsafe_allow_html=True)
+    st.markdown(kpi_box("Faturamento Total", f"USD {faturamento_total:.2f}", "linear-gradient(to top, #d0f0c0, #b0e57c)"), unsafe_allow_html=True)
 
 
 with col2:
-    st.markdown(kpi_box("Ticket Médio", f"R$ {ticket_medio:.2f}", "linear-gradient(to top, #d0f0c0, #b0e57c)"), unsafe_allow_html=True)
+    st.markdown(kpi_box("Ticket Médio", f"USD {ticket_medio:.2f}", "linear-gradient(to top, #d0f0c0, #b0e57c)"), unsafe_allow_html=True)
 
 with col3:
     st.markdown(kpi_box("Satisfação Média", f"{percent_satisfacao:.2%}", "linear-gradient(to bottom, #4d94d4, #cceeff)"), unsafe_allow_html=True)
