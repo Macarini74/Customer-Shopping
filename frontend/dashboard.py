@@ -4,7 +4,7 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 
-st.markdown(f"<h1 style='text-align: center;'>📊 Dashboard Geralgit </h1>", unsafe_allow_html=True)
+st.markdown(f"<h1 style='text-align: center;'>📊 Dashboard Geral</h1>", unsafe_allow_html=True)
 
 conn = sqlite3.connect("data/shopping.db")
 cursor = conn.cursor()

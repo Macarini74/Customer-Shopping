@@ -72,7 +72,7 @@ fig_map = px.choropleth(
     locationmode='USA-states',
     color='total_revenue',
     scope='usa',
-    title='💰 Receita Total por Estado (EUA)',
+    title=' ',
     labels={'total_revenue': 'Receita (USD)'},
     color_continuous_scale='Blues'
 )
@@ -98,10 +98,7 @@ if selected_state_abbrev:
     )
 
 # Centralizar título
-fig_map.update_layout(title_x=0.5)
 
-st.subheader("🌍 Receita Total por Estado")
-st.plotly_chart(fig_map, use_container_width=True)
 
 ## Big Numbers
 
@@ -153,6 +150,11 @@ with col4:
     st.markdown(kpi_box("Taxa de Assinantes", f"{taxa_assinantes:.2f}", "linear-gradient(to bottom, #4d94d4, #cceeff)"), unsafe_allow_html=True)
 
 st.subheader('', divider=True)
+
+fig_map.update_layout(title_x=0.35)
+st.markdown(f"<h3 style='text-align: center;'>🌍 Receita Total por Estado </h3>", unsafe_allow_html=True)
+
+st.plotly_chart(fig_map, use_container_width=True)
 
 col1, col2 = st.columns(2)
 
