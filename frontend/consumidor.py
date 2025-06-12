@@ -5,6 +5,22 @@ import plotly.express as px
 
 conn = sqlite3.connect('data/shopping.db')
 
+def kpi_box(title, value, gradient_css):
+    return f"""
+    <div style="
+        background: {gradient_css};
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        font-family: Arial, sans-serif;
+        margin-bottom: 10px;
+    ">
+        <h3 style='margin:0'>{title}</h3>
+        <p style='font-size: 24px; margin: 5px 0 0 0; font-weight: bold;'>{value}</p>
+    </div>
+    """
+
 query_revenue = """
 SELECT SUM(purchase_amount_usd) AS total_revenue
 FROM shopping
@@ -52,13 +68,45 @@ else:
     genero_predominante = "N/A"
 
 st.markdown("<h1 style='text-align: center;'>👤 Perfil do Consumidor</h1>", unsafe_allow_html=True)
-st.divider()
 
-col1, col2, col3, col4 = st.columns(4)
-col1.metric("💰 Receita Total (USD)", f"{total_revenue:,.2f}")
-col2.metric("🛒 Ticket Médio (USD)", f"{avg_ticket:,.2f}")
-col3.metric("👥 Faixa Etária Mais Numerosa", faixa_etaria)
-col4.metric("🚻 Gênero Predominante", genero_predominante)
+col1, col2, = st.columns(2)
+col3, col4 = st.columns(2)
+with col1:
+    st.markdown(
+        kpi_box(
+            "💰 Receita Total (USD)",
+            f"{total_revenue:,.2f}",
+            "linear-gradient(to top, #d0f0c0, #b0e57c)"
+        ),
+        unsafe_allow_html=True
+    )
+with col2:
+    st.markdown(
+        kpi_box(
+            "🛒 Ticket Médio (USD)",
+            f"{avg_ticket:,.2f}",
+            "linear-gradient(to top, #d0f0c0, #b0e57c)"
+        ),
+        unsafe_allow_html=True
+    )
+with col3:
+    st.markdown(
+        kpi_box(
+            "👥 Faixa Etária Mais Numerosa",
+            faixa_etaria,
+            "linear-gradient(to bottom, #4d94d4, #cceeff)"
+        ),
+        unsafe_allow_html=True
+    )
+with col4:
+    st.markdown(
+        kpi_box(
+            "🚻 Gênero Predominante",
+            genero_predominante,
+            "linear-gradient(to bottom, #4d94d4, #cceeff)"
+        ),
+        unsafe_allow_html=True
+    )
 
 st.divider()
 
