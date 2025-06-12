@@ -306,3 +306,5 @@ fig3.update_traces(textposition='inside')
 with st.container(border=True):
     st.subheader("🔄 Frequência de Compras vs. Uso de Descontos")
     st.plotly_chart(fig3, use_container_width=True)
+
+conn.close()
