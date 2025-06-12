@@ -2,6 +2,7 @@ import streamlit as st
 import sqlite3
 import plotly.express as px
 import pandas as pd
+import plotly.graph_objects as go
 
 # Análise Exclusivas:
 #     Mapa de Calor Geográfico (heatmap)
@@ -14,9 +15,10 @@ import pandas as pd
 #         (frequência de compras)
   
 st.subheader('', divider=True)
-
 conn = sqlite3.connect("data/shopping.db")
 cursor = conn.cursor()
+
+df = pd.read_sql_query("SELECT * FROM shopping ", conn)
 
 cursor.execute('SELECT DISTINCT location FROM shopping')
 
@@ -25,6 +27,82 @@ cidades = [row[0] for row in cursor.fetchall() if row[0] is not None]
 cidades.sort()
 
 natureza_escolhida = st.selectbox("**Selecione uma cidade:**", cidades)
+
+# Carregar todos os dados
+df = pd.read_sql_query("SELECT * FROM shopping", conn)
+
+# 1. Dicionário de mapeamento: estado completo → sigla USPS
+state_abbrev = {
+    'Alabama':'AL','Alaska':'AK','Arizona':'AZ','Arkansas':'AR','California':'CA',
+    'Colorado':'CO','Connecticut':'CT','Delaware':'DE','Florida':'FL','Georgia':'GA',
+    'Hawaii':'HI','Idaho':'ID','Illinois':'IL','Indiana':'IN','Iowa':'IA',
+    'Kansas':'KS','Kentucky':'KY','Louisiana':'LA','Maine':'ME','Maryland':'MD',
+    'Massachusetts':'MA','Michigan':'MI','Minnesota':'MN','Mississippi':'MS',
+    'Missouri':'MO','Montana':'MT','Nebraska':'NE','Nevada':'NV',
+    'New Hampshire':'NH','New Jersey':'NJ','New Mexico':'NM','New York':'NY',
+    'North Carolina':'NC','North Dakota':'ND','Ohio':'OH','Oklahoma':'OK',
+    'Oregon':'OR','Pennsylvania':'PA','Rhode Island':'RI','South Carolina':'SC',
+    'South Dakota':'SD','Tennessee':'TN','Texas':'TX','Utah':'UT','Vermont':'VT',
+    'Virginia':'VA','Washington':'WA','West Virginia':'WV','Wisconsin':'WI',
+    'Wyoming':'WY'
+}
+
+# 2. Criar coluna com sigla
+df['state_code'] = df['location'].map(state_abbrev)
+
+# 3. Obter sigla do estado selecionado
+selected_state_abbrev = state_abbrev.get(natureza_escolhida)
+
+# 4. Agregar receita por estado
+revenue_by_state = (
+    df.dropna(subset=['state_code'])
+    .groupby('state_code', as_index=False)['purchase_amount_usd']
+    .sum()
+    .rename(columns={'purchase_amount_usd': 'total_revenue'})
+)
+
+# 5. Criar coluna para destacar o estado selecionado
+revenue_by_state['highlight'] = revenue_by_state['state_code'] == selected_state_abbrev
+
+# 6. Plotar choropleth dos EUA com destaque
+fig_map = px.choropleth(
+    revenue_by_state,
+    locations='state_code',
+    locationmode='USA-states',
+    color='total_revenue',
+    scope='usa',
+    title='💰 Receita Total por Estado (EUA)',
+    labels={'total_revenue': 'Receita (USD)'},
+    color_continuous_scale='Blues'
+)
+
+# Destacar o estado selecionado com borda
+if selected_state_abbrev:
+    fig_map.update_traces(
+        marker_line_width=1,
+        marker_line_color='gray',
+        selector=dict(type='choropleth')
+    )
+    
+    # Adicionar borda destacada para o estado selecionado
+    fig_map.add_trace(
+        go.Choropleth(
+            locations=[selected_state_abbrev],
+            z=[1],  # Valor fictício para cor
+            locationmode='USA-states',
+            colorscale=[[0, 'rgba(0,0,0,0)'], [1, 'rgba(0,0,0,0)']],  # Preenchimento transparente
+            marker_line_width=3,
+            marker_line_color='red',
+            showscale=False,
+            hoverinfo='skip'
+        )
+    )
+
+# Centralizar título
+fig_map.update_layout(title_x=0.5)
+
+st.subheader("🌍 Receita Total por Estado")
+st.plotly_chart(fig_map, use_container_width=True)
 
 ## Big Numbers
 
@@ -74,19 +152,20 @@ taxa_assinantes = (cursor.fetchone()[0] / total_clientes)
 
 col3.container(border=True).metric('Taxa de Assinantes', f'{taxa_assinantes:.2%}')
 
+# Adicionando novas abas
 localizacao, pagamentos, generos, descontos, sazonalidade, preferencias = st.tabs([
     'Análise Pelo Valor e Categoria', 
     'Análise Pelo Método de Pagamento', 
-    'Analise por Gênero', 
+    'Analise por Gênero',
     'Descontos e Vendas',
     'Sazonalidade',
     'Preferências (Tamanho/Cor)'
 ])
 
 with localizacao:
-
+    st.subheader("Vendas por Categoria", divider=True, anchor=False)
     cursor.execute("DROP VIEW IF EXISTS maps")
-
+    
     cursor.execute('''
         CREATE VIEW IF NOT EXISTS maps AS
             SELECT 
@@ -100,16 +179,18 @@ with localizacao:
             ORDER BY
                 location, total_amount DESC
     ''')
-
+    
     df = pd.read_sql_query("SELECT * FROM maps WHERE location = ?", conn, params=(natureza_escolhida,))
-
-    fig = px.histogram(df, x="category", y='total_amount', color='category')
-    st.container(border=True).plotly_chart(fig)
+    
+    fig = px.bar(df, x="category", y='total_amount', color='category',
+                 title='Valor Total de Vendas por Categoria')
+    fig.update_layout(title_x=0.4)  # Centraliza o título
+    st.plotly_chart(fig)
 
 with pagamentos:
-
-    cursor.execute("DROP VIEW IF EXISTS maps")
-
+    st.subheader("Métodos de Pagamento", divider=True, anchor=False)
+    cursor.execute("DROP VIEW IF EXISTS payments")
+    
     cursor.execute('''
         CREATE VIEW IF NOT EXISTS payments AS
                 SELECT 
@@ -124,16 +205,18 @@ with pagamentos:
                 ORDER BY
                         location
     ''')
-
+    
     df = pd.read_sql_query("SELECT * FROM payments WHERE location = ?", conn, params=(natureza_escolhida,))
-
-    fig = px.pie(df, values='quantidade', names='payment_method')
-    st.container(border=True).plotly_chart(fig)
+    
+    fig = px.pie(df, values='quantidade', names='payment_method', 
+                 title='Distribuição de Métodos de Pagamento')
+    fig.update_layout(title_x=0.5)  # Centraliza o título
+    st.plotly_chart(fig)
 
 with generos:
-
+    st.subheader("Distribuição por Gênero", divider=True, anchor=False)
     cursor.execute("DROP VIEW IF EXISTS genders")
-
+    
     cursor.execute('''
                 CREATE VIEW IF NOT EXISTS genders AS
                     SELECT
@@ -151,12 +234,15 @@ with generos:
                    ''')
     
     df = pd.read_sql_query("SELECT * FROM genders WHERE location = ?", conn, params=(natureza_escolhida,))
+    
+    fig = px.bar(df, x="gender", y='quantidade', color="gender",
+                 title='Distribuição de Compras por Gênero')
+    fig.update_layout(title_x=0.5)  # Centraliza o título
+    st.plotly_chart(fig)
 
-    fig = px.histogram(df, x="gender", y='quantidade', color="category")
-    st.container(border=True).plotly_chart(fig)
-
+# NOVOS GRÁFICOS ADICIONADOS
 with descontos:
-    st.subheader("Correlação entre Descontos e Volume de Vendas")
+    st.subheader("Impacto de Descontos nas Vendas", divider=True, anchor=False)
     
     # Consulta para correlacionar descontos e volume de vendas
     cursor.execute("""
@@ -174,20 +260,22 @@ with descontos:
     
     df_discount = pd.DataFrame(cursor.fetchall(), columns=['Desconto', 'Valor Médio', 'Total Compras'])
     
-    # Criando gráfico duplo (barras e linha)
-    fig = px.bar(df_discount, x='Desconto', y='Total Compras', 
+    # Criando gráficos
+    fig1 = px.bar(df_discount, x='Desconto', y='Total Compras', 
                  title='Volume de Compras com e sem Desconto',
                  color='Desconto')
+    fig1.update_layout(title_x=0.5)
     
-    fig2 = px.line(df_discount, x='Desconto', y='Valor Médio', 
-                  title='Valor Médio por Transação',
-                  markers=True)
+    fig2 = px.bar(df_discount, x='Desconto', y='Valor Médio', 
+                 title='Valor Médio por Transação',
+                 color='Desconto')
+    fig2.update_layout(title_x=0.5)
     
-    st.container(border=True).plotly_chart(fig)
-    
+    st.plotly_chart(fig1)
+    st.plotly_chart(fig2)
 
 with sazonalidade:
-    st.subheader("Padrões de Compras por Estação")
+    st.subheader("Padrões de Compras Sazonais", divider=True, anchor=False)
     
     # Consulta para sazonalidade
     cursor.execute("""
@@ -205,21 +293,22 @@ with sazonalidade:
     
     df_season = pd.DataFrame(cursor.fetchall(), columns=['Estação', 'Vendas Totais', 'Total Compras'])
     
-    # Gráfico de vendas por estação
-    fig = px.bar(df_season, x='Estação', y='Vendas Totais', 
+    # Gráficos
+    fig1 = px.bar(df_season, x='Estação', y='Vendas Totais', 
                  title='Vendas Totais por Estação',
                  color='Estação')
+    fig1.update_layout(title_x=0.5)
     
-    # Gráfico de volume de compras por estação
-    fig2 = px.pie(df_season, values='Total Compras', names='Estação', 
-                 title='Distribuição de Compras por Estação')
+    fig2 = px.line(df_season, x='Estação', y='Total Compras', 
+                 title='Volume de Compras por Estação',
+                 markers=True)
+    fig2.update_layout(title_x=0.5)
     
-    col1, col2 = st.columns(2)
-    col1.container(border=True).plotly_chart(fig, use_container_width=True)
-    col2.container(border=True).plotly_chart(fig2, use_container_width=True)
+    st.plotly_chart(fig1)
+    st.plotly_chart(fig2)
 
 with preferencias:
-    st.subheader("Preferências de Tamanho e Cor")
+    st.subheader("Preferências de Tamanho e Cor", divider=True, anchor=False)
     
     # Consulta para tamanhos
     cursor.execute("""
@@ -251,21 +340,24 @@ with preferencias:
     
     df_color = pd.DataFrame(cursor.fetchall(), columns=['Cor', 'Total'])
     
-    # Gráficos combinados
+    # Gráficos
     fig_size = px.bar(df_size, x='Tamanho', y='Total', 
                       title='Preferência de Tamanhos',
                       color='Tamanho')
+    fig_size.update_layout(title_x=0.5)
     
     fig_color = px.bar(df_color, x='Cor', y='Total', 
                        title='Preferência de Cores',
                        color='Cor')
+    fig_color.update_layout(title_x=0.5)
     
     fig_pie = px.pie(df_color, values='Total', names='Cor', 
-                     title='Distribuição de Cores')
+                     title='Distribuição Percentual de Cores')
+    fig_pie.update_layout(title_x=0.5)
     
-    st.container(border=True).plotly_chart(fig_size)
-    
-    col1, col2 = st.columns(2)
-    col1.container(border=True).plotly_chart(fig_color, use_container_width=True)
-    col2.container(border=True).plotly_chart(fig_pie, use_container_width=True)
-    
+    st.plotly_chart(fig_size)
+    st.plotly_chart(fig_color)
+    st.plotly_chart(fig_pie)
+
+# Fechar conexão com o banco de dados
+conn.close()
