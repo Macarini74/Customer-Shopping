@@ -32,7 +32,7 @@ cl1, cl2, cl3, cl4 = st.columns(4)
 # ====================================
 # GRÁFICO: Frequência de Compras por Status de Assinatura
 # ====================================
-st.subheader("Frequência de Compras por Status de Assinatura")
+st.subheader(" ", divider=True)
 
 frequency_by_subscription = df.groupby(['subscription_status', 'frequency_of_purchases']).size().reset_index(name='count')
 frequency_by_subscription['proportion'] = frequency_by_subscription.groupby('subscription_status')['count'].transform(lambda x: x / x.sum())
@@ -57,7 +57,9 @@ fig_frequency = px.bar(
 )
 fig_frequency.update_layout(yaxis_tickformat='.1%')
 fig_frequency.update_traces(textposition='outside')
-st.plotly_chart(fig_frequency)
+with st.container(border=True):
+    st.markdown(f"<h3 style='text-align: center;'>Frequência de Compras por Status de Assinatura</h3>", unsafe_allow_html=True)
+    st.plotly_chart(fig_frequency)
 
 # ====================================
 # KPIs: Ticket Médio e Clientes
@@ -77,7 +79,7 @@ diferenca_percentual_ticket_medio = 0
 if ticket_mediono != 0:
     diferenca_percentual_ticket_medio = ((ticket_medio_yes - ticket_mediono) / ticket_mediono) * 100
 
-st.divider()
+st.subheader(' ', divider=True)
 
 # ====================================
 # GRÁFICO: Método de Pagamento por Grupo
@@ -111,10 +113,13 @@ fig = px.bar(
     y='Proporcao',
     color='Grupo',
     barmode='stack',
-    title='Proporção de Grupos por Método de Pagamento',
+    title=' ',
     text_auto='.0%'
 )
-pcol2.plotly_chart(fig)
+
+with pcol2.container(border=True):
+    st.markdown(f"<h3 style='text-align: center;'>Proporção de Grupos por Método de Pagamento</h3>", unsafe_allow_html=True)
+    st.plotly_chart(fig)
 
 # Gráfico de pizza: distribuição geral
 pagamento_geral = df['preferred_payment_method'].value_counts().reset_index()
@@ -124,19 +129,25 @@ fig_pizza_pagamento = px.pie(
     pagamento_geral,
     names='Metodo de Pagamento',
     values='Quantidade',
-    title='Distribuição Geral dos Métodos de Pagamento',
+    title=' ',
     hole=0,
     color_discrete_sequence=px.colors.sequential.Blues_r
 )
-pcol1.plotly_chart(fig_pizza_pagamento)
 
-st.divider()
+with pcol1.container(border=True):
+    st.markdown(f"<h3 style='text-align: center;'>Distribuição Geral dos Métodos de Pagamento</h3>", unsafe_allow_html=True)    
+    st.plotly_chart(fig_pizza_pagamento)
+
+st.subheader(' ', divider=True)
 
 # ====================================
 # GRÁFICO: Frequência e Proporção de Cupons por Temporada
 # ====================================
 cl1g, cl2g = st.columns(2)
-st.subheader("Frequência e Proporção de Cupons por Temporada")
+
+st.subheader(' ', divider=True)
+
+st.markdown(f"<h3 style='text-align: center;'>Frequência e Proporção de Cupons por Temporada</h3>", unsafe_allow_html=True)
 
 season_yes = discount_applied_yes.groupby('season').size().rename('com_desconto')
 season_no = discount_applied_no.groupby('season').size().rename('sem_desconto')
@@ -145,17 +156,20 @@ season_data = pd.concat([season_yes, season_no], axis=1).fillna(0)
 season_data['total'] = season_data['com_desconto'] + season_data['sem_desconto']
 season_data['proporcao_com_desconto'] = season_data['com_desconto'] / season_data['total']
 
-st.dataframe(season_data)
+st.dataframe(season_data, use_container_width=True)
 
 fig = px.pie(
     season_data.reset_index(),
     names='season',
     values='proporcao_com_desconto',
-    title='Proporção de Uso de Cupons por Temporada',
+    title=' ',
     hole=0.4,
     color_discrete_sequence=px.colors.sequential.Blues_r
 )
-cl1g.plotly_chart(fig)
+
+with cl1g.container(border=True):
+    st.markdown(f"<h3 style='text-align: center;'>Proporção de Uso de Cupons por Temporada</h3>", unsafe_allow_html=True)
+    st.plotly_chart(fig)      
 
 # ====================================
 # GRÁFICO: Porcentagem de Uso de Cupons
@@ -171,11 +185,15 @@ fig = px.bar(
     y='Porcentagem',
     text='Porcentagem',
     color='Uso de Cupom',
-    title='Porcentagem de Clientes que Usam Cupom vs. Não Usam'
+    title=' ',
+    height=417
 )
 fig.update_traces(texttemplate='%{text:.1f}%', textposition='outside')
 fig.update_layout(yaxis_tickformat='.1f%', showlegend=False)
-cl2g.plotly_chart(fig)
+
+with cl2g.container(border=True):
+    st.markdown(f"<h3 style='text-align: center;'>Porcentagem de Clientes que Usam Cupom vs. Não Usam</h3>", unsafe_allow_html=True)
+    st.plotly_chart(fig)   
 
 # ====================================
 # GRÁFICO: Satisfação por Categoria

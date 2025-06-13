@@ -97,9 +97,6 @@ if selected_state_abbrev:
         )
     )
 
-# Centralizar título
-
-
 ## Big Numbers
 
 col1, col2 = st.columns(2)
@@ -164,7 +161,8 @@ with col1.container(border=True):
     'Análise Pelo Método de Pagamento'
     ])
     with localizacao:
-        st.subheader("Vendas por Categoria", divider=True, anchor=False)
+        st.markdown(f"<h3 style='text-align: center;'>Vendas por Categoria </h3>", unsafe_allow_html=True)
+        st.subheader('',divider=True, anchor=False)
         cursor.execute("DROP VIEW IF EXISTS maps")
         
         cursor.execute('''
@@ -187,12 +185,13 @@ with col1.container(border=True):
                     x="category",
                     y='total_amount',
                     color='category',
-                    title='Valor Total de Vendas por Categoria')
+                    title=' ')
         fig.update_layout(title_x=0.35)
         st.plotly_chart(fig)
 
     with pagamentos:
-        st.subheader("Métodos de Pagamento", divider=True, anchor=False)
+        st.markdown(f"<h3 style='text-align: center;'>Métodos de Pagamento </h3>", unsafe_allow_html=True)
+        st.subheader("", divider=True, anchor=False)
         cursor.execute("DROP VIEW IF EXISTS payments")
         
         cursor.execute('''
@@ -215,7 +214,7 @@ with col1.container(border=True):
         fig = px.pie(df,
                     values='quantidade',
                     names='payment_method', 
-                    title='Distribuição de Métodos de Pagamento')
+                    title=' ')
         fig.update_layout(title_x=0.30) 
         st.plotly_chart(fig)
 
@@ -226,7 +225,8 @@ with col2.container(border=True):
     'Descontos e Vendas'
     ])
     with generos:
-        st.subheader("Distribuição por Gênero", divider=True, anchor=False)
+        st.markdown(f"<h3 style='text-align: center;'>Distribuição por Gênero </h3>", unsafe_allow_html=True)
+        st.subheader("", divider=True, anchor=False)        
         cursor.execute("DROP VIEW IF EXISTS genders")
         
         cursor.execute('''
@@ -251,12 +251,13 @@ with col2.container(border=True):
                         x="quantidade",
                         y='gender',
                         color="gender",
-                        title='Distribuição de Compras por Gênero')
+                        title=' ')
         fig.update_layout(title_x=0.30) 
         st.plotly_chart(fig)
 
     with descontos:
-        st.subheader("Impacto de Descontos nas Vendas", divider=True, anchor=False)
+        st.markdown(f"<h3 style='text-align: center;'>Impacto de Descontos nas Vendas</h3>", unsafe_allow_html=True)
+        st.subheader("", divider=True, anchor=False)        
         
         cursor.execute("""
             SELECT 
@@ -276,7 +277,7 @@ with col2.container(border=True):
         fig1 = px.bar(df_discount,
                         x='Total Compras',
                         y='Desconto', 
-                        title='Volume de Compras com e sem Desconto',
+                        title=' ',
                         color='Desconto',
                         color_continuous_scale='Blues'
                     )
@@ -289,7 +290,8 @@ sazonalidade, preferencias = st.tabs([
     'Preferências (Tamanho/Cor'])
 
 with sazonalidade:
-    st.subheader("Padrões de Compras Sazonais", divider=True, anchor=False)
+    st.markdown(f"<h3 style='text-align: center;'>Padrões de Compras Sazonais</h3>", unsafe_allow_html=True)
+    st.subheader("", divider=True, anchor=False)
     
     cursor.execute("""
         SELECT 
@@ -328,7 +330,8 @@ with sazonalidade:
     col2.container(border=True).plotly_chart(fig2)
 
 with preferencias:
-    st.subheader("Preferências de Tamanho e Cor", divider=True, anchor=False)
+    st.markdown(f"<h3 style='text-align: center;'>Preferências de Tamanho e Cor</h3>", unsafe_allow_html=True)
+    st.subheader("", divider=True, anchor=False)
     
     cursor.execute("""
         SELECT 

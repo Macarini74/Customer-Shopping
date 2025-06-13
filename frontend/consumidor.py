@@ -150,7 +150,8 @@ fig = px.imshow(
 )
 
 with st.container(border=True):
-    st.subheader("🗺️ Faixa Etária vs. Categoria Preferida")
+    st.markdown(f"<h3 style='text-align: center;'>🗺️ Faixa Etária vs. Categoria Preferida</h3>", unsafe_allow_html=True)
+    st.subheader(" ", divider=True)
     st.plotly_chart(fig, use_container_width=True)
 
 st.divider()
@@ -196,7 +197,8 @@ fig1.update_layout(
 )
 
 with st.container(border=True):
-    st.subheader("🎨 Preferência de Cores por Gênero")
+    st.markdown(f"<h3 style='text-align: center;'>🎨 Preferência de Cores por Gênero</h3>", unsafe_allow_html=True)
+    st.subheader(" ", divider=True)
     st.plotly_chart(fig1, use_container_width=True)
 
 st.divider()
@@ -252,7 +254,8 @@ fig2.update_layout(
 fig2.update_traces(textposition='inside')
 
 with st.container(border=True):
-    st.subheader("🔖 Adoção de Assinaturas por Gênero")
+    st.markdown(f"<h3 style='text-align: center;'>🔖 Adoção de Assinaturas por Gênero</h3>", unsafe_allow_html=True)
+    st.subheader(" ", divider=True)
     st.plotly_chart(fig2, use_container_width=True)
 
 st.divider()
@@ -304,7 +307,8 @@ fig3.update_layout(
 fig3.update_traces(textposition='inside')
 
 with st.container(border=True):
-    st.subheader("🔄 Frequência de Compras vs. Uso de Descontos")
+    st.markdown(f"<h3 style='text-align: center;'>🔄 Frequência de Compras vs. Uso de Descontos</h3>", unsafe_allow_html=True)
+    st.subheader(" ", divider=True)
     st.plotly_chart(fig3, use_container_width=True)
 
 conn.close()
