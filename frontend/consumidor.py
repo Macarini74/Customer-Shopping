@@ -74,7 +74,7 @@ col3, col4 = st.columns(2)
 with col1:
     st.markdown(
         kpi_box(
-            "💰 Receita Total (USD)",
+            "Receita Total (USD)",
             f"{total_revenue:,.2f}",
             "linear-gradient(to top, #d0f0c0, #b0e57c)"
         ),
@@ -83,7 +83,7 @@ with col1:
 with col2:
     st.markdown(
         kpi_box(
-            "🛒 Ticket Médio (USD)",
+            "Ticket Médio (USD)",
             f"{avg_ticket:,.2f}",
             "linear-gradient(to top, #d0f0c0, #b0e57c)"
         ),
@@ -92,7 +92,7 @@ with col2:
 with col3:
     st.markdown(
         kpi_box(
-            "👥 Faixa Etária Mais Numerosa",
+            "Faixa Etária Mais Numerosa",
             faixa_etaria,
             "linear-gradient(to bottom, #4d94d4, #cceeff)"
         ),
@@ -101,7 +101,7 @@ with col3:
 with col4:
     st.markdown(
         kpi_box(
-            "🚻 Gênero Predominante",
+            "Gênero Predominante",
             genero_predominante,
             "linear-gradient(to bottom, #4d94d4, #cceeff)"
         ),
